@@ -38,6 +38,15 @@ open class VCPreviewView: UIView {
     private var layerSizeDidUpdate = false
 
     public var flipX = false
+    
+    private var fillColor: (Double, Double, Double) {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        superview?.backgroundColor?.getRed(&red, green: &green, blue: &blue, alpha: nil)
+        
+        return (Double(red), Double(blue), Double(green))
+    }
 
     final public override class var layerClass: AnyClass {
         #if targetEnvironment(simulator)
@@ -82,8 +91,6 @@ open class VCPreviewView: UIView {
 
     open override func layoutSubviews() {
         super.layoutSubviews()
-
-        backgroundColor = .black
         layerSizeDidUpdate = true
     }
 
@@ -343,7 +350,8 @@ private extension VCPreviewView {
 
         // make sure to clear every frame for best performance
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
+        let colorValues = fillColor
+        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(colorValues.0, colorValues.1, colorValues.2, 1)
 
         // store only attachments that will be presented to the screen
         renderPassDescriptor.colorAttachments[0].storeAction = .store
