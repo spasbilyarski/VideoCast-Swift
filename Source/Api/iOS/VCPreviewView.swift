@@ -43,7 +43,19 @@ open class VCPreviewView: UIView {
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
+        
         superview?.backgroundColor?.getRed(&red, green: &green, blue: &blue, alpha: nil)
+
+        if #available(iOS 9.0, *) {
+            if let inputColorSpace = superview?.backgroundColor?.cgColor.colorSpace {
+                let initialComponents = [red, green, blue, 1]
+                let cgColor = CGColor(colorSpace: inputColorSpace, components: initialComponents)!
+                let colorSpace = CGColorSpace(name:CGColorSpace.sRGB)!
+                let components = cgColor.converted(to: colorSpace, intent: .relativeColorimetric, options: nil)!.components!
+                
+                return (Double(components[0]), Double(components[1]), Double(components[2]))
+            }
+        }
         
         return (Double(red), Double(blue), Double(green))
     }
