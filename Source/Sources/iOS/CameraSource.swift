@@ -441,9 +441,9 @@ open class CameraSource: ISource {
                 case .portraitUpsideDown:
                     orientation = .portraitUpsideDown
                 case .landscapeLeft:
-                    orientation = .landscapeLeft
-                case .landscapeRight:
                     orientation = .landscapeRight
+                case .landscapeRight:
+                    orientation = .landscapeLeft
                 default:
                     orientation = UIApplication.shared.statusBarOrientation
                 }
