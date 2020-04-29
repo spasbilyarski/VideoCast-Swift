@@ -40,6 +40,12 @@ open class CameraSource: ISource {
     private var fps: Int = 0
     private var torchOn: Bool = false
     private var useInterfaceOrientation: Bool = false
+    
+    var forcedOrientation: UIInterfaceOrientation? {
+        didSet {
+            reorientCamera()
+        }
+    }
 
     public init() {
 
@@ -424,7 +430,9 @@ open class CameraSource: ISource {
         var orientation: UIInterfaceOrientation = .unknown
 
         syncSafe {
-            if useInterfaceOrientation {
+            if let forcedOrientation = forcedOrientation {
+                orientation = forcedOrientation
+            } else if useInterfaceOrientation {
                 orientation = UIApplication.shared.statusBarOrientation
             } else {
                 switch UIDevice.current.orientation {
