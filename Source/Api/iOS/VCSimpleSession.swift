@@ -229,7 +229,7 @@ open class VCSimpleSession {
         self.useInterfaceOrientation = useInterfaceOrientation
         self.screencast = screencast
 
-        self.previewView = .init()
+        self.previewView = .init(frame: .zero)
 
         self._cameraState = cameraState
         updatePreview()

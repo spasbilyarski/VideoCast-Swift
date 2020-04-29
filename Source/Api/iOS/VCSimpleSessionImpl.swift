@@ -483,6 +483,7 @@ extension VCSimpleSession {
 
     func updatePreview() {
         previewView.flipX = _mirrorPreview ? _cameraState == .front : false
+        previewView.isRotatingWithOrientation = !useInterfaceOrientation
     }
 
     // swiftlint:disable:next function_body_length

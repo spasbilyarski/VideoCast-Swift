@@ -36,7 +36,7 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="l9C-zN-svY">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <color key="backgroundColor" systemColor="systemOrangeColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kVn-dQ-0Wq" userLabel="Top Control View">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="80"/>
@@ -152,7 +152,6 @@
                                 </constraints>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemGreenColor" red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="Fxs-Sl-2ds" secondAttribute="trailing" id="17R-Qd-pdj"/>
                             <constraint firstItem="kVn-dQ-0Wq" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" id="3T1-LI-paH"/>
