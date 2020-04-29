@@ -220,7 +220,7 @@ class ViewController: UIViewController {
             bitrate: OptionsModel.shared.bitrate,
             videoCodecType: OptionsModel.shared.videoCodec,
             useInterfaceOrientation: true,
-            aspectMode: .fill
+            aspectMode: .fit
         )
         previewView.addSubview(session.previewView)
         session.previewView.frame = previewView.bounds

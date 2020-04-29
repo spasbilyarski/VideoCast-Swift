@@ -13,6 +13,21 @@ open class VCPreviewView: UIImageView {
     private var paused = Atomic(false)
 
     public var flipX = false
+    
+    public var aspectMode: VCAspectMode {
+        set {
+            switch newValue {
+            case .fill:
+                contentMode = .scaleAspectFill
+            case .fit:
+                contentMode = .scaleAspectFit
+            }
+        }
+        get {
+            contentMode == .scaleAspectFit ? .fit : .fill
+        }
+    }
+
     public var isRotatingWithOrientation = false
 
     override init(frame: CGRect) {

@@ -483,6 +483,7 @@ extension VCSimpleSession {
 
     func updatePreview() {
         previewView.flipX = _mirrorPreview ? _cameraState == .front : false
+        previewView.aspectMode = aspectMode
         previewView.isRotatingWithOrientation = !useInterfaceOrientation
     }
 
