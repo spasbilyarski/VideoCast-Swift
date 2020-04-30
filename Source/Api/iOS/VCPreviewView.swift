@@ -77,6 +77,7 @@ open class VCPreviewView: UIImageView {
                     }
                 }
 
+                EAGLContext.setCurrent(nil)
                 let context = CIContext(options: nil)
                 
                 guard let cgImage = context.createCGImage(ciImage, from: rect) else {
