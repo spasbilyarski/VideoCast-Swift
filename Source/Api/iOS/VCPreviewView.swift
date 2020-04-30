@@ -45,48 +45,50 @@ open class VCPreviewView: UIImageView {
     }
     
     open func drawFrame(_ pixelBuffer: CVPixelBuffer) {
-        guard !paused.value else { return }
+        guard !paused.value else {
+            return
+        }
         
-        autoreleasepool {
-            DispatchQueue.main.async { [weak self] in
-                guard let `self` = self else { return }
-                
-                var ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-                
-                let width = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
-                let height = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
-                var rect = CGRect(origin: .zero, size: CGSize(width: width, height: height))
-
-                if self.isRotatingWithOrientation {
-                    let orientation = UIDevice.current.orientation
-                    let imageOrientation: CGImagePropertyOrientation
-                    
-                    switch orientation {
-                    case .landscapeLeft:
-                        imageOrientation = self.flipX ? .rightMirrored : .right
-                    case .landscapeRight:
-                        imageOrientation = self.flipX ? .leftMirrored : .left
-                    default:
-                        imageOrientation = .up
-                    }
-                    
-                    ciImage = ciImage.oriented(forExifOrientation: Int32(imageOrientation.rawValue))
-                    
-                    if orientation.isLandscape {
-                        rect = CGRect(origin: .zero, size: CGSize(width: height, height: width))
-                    }
-                }
-
-                EAGLContext.setCurrent(nil)
-                let context = CIContext(options: nil)
-                
-                guard let cgImage = context.createCGImage(ciImage, from: rect) else {
-                    return
-                }
-                
-                let uiImage = UIImage(cgImage: cgImage)
-                self.image = uiImage
+        DispatchQueue.main.async { [weak self] in
+            guard let `self` = self else {
+                return
             }
+            
+            var ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+            
+            let width = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
+            let height = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
+            var rect = CGRect(origin: .zero, size: CGSize(width: width, height: height))
+            
+            if self.isRotatingWithOrientation {
+                let orientation = UIDevice.current.orientation
+                let imageOrientation: CGImagePropertyOrientation
+                
+                switch orientation {
+                case .landscapeLeft:
+                    imageOrientation = self.flipX ? .rightMirrored : .right
+                case .landscapeRight:
+                    imageOrientation = self.flipX ? .leftMirrored : .left
+                default:
+                    imageOrientation = .up
+                }
+                
+                ciImage = ciImage.oriented(forExifOrientation: Int32(imageOrientation.rawValue))
+                
+                if orientation.isLandscape {
+                    rect = CGRect(origin: .zero, size: CGSize(width: height, height: width))
+                }
+            }
+            
+            EAGLContext.setCurrent(nil)
+            let context = CIContext(options: nil)
+            
+            guard let cgImage = context.createCGImage(ciImage, from: rect) else {
+                return
+            }
+            
+            let uiImage = UIImage(cgImage: cgImage)
+            self.image = uiImage
         }
     }
 }
