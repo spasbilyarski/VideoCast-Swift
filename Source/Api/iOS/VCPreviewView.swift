@@ -10,7 +10,7 @@ import UIKit
 
 open class VCPreviewView: UIImageView {
     
-    public var paused = false
+    public var paused = Atomic(false)
 
     public var flipX = false
     
@@ -45,7 +45,7 @@ open class VCPreviewView: UIImageView {
     }
     
     open func drawFrame(_ pixelBuffer: CVPixelBuffer) {
-        guard !paused else {
+        guard !paused.value else {
             return
         }
         
@@ -108,11 +108,11 @@ private extension VCPreviewView {
     }
 
     @objc func applicationDidEnterBackground() {
-        paused = true
+        paused.value = true
     }
 
     @objc func applicationWillEnterForeground() {
-        paused = false
+        paused.value = false
     }
 
 }
