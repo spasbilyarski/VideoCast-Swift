@@ -193,16 +193,6 @@ class ViewController: UIViewController {
                     streamKey: server.streamName
                 )
             }
-            if server.url.starts(with: "srt") {
-                guard var urlComponents = URLComponents(string: server.url) else { return }
-                var items = urlComponents.queryItems ?? []
-                items.append(URLQueryItem(name: "streamid", value: server.streamName))
-                urlComponents.queryItems = items
-
-                session.startSRTSession(
-                    url: urlComponents.url!.absoluteString
-                )
-            }
         default:
             session.endSession()
         }

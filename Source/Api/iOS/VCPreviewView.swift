@@ -29,6 +29,8 @@ open class VCPreviewView: UIImageView {
     }
 
     public var isRotatingWithOrientation = false
+    
+    private let drawingQueue = DispatchQueue(label: "openfresh.videocast.drawingQueue")
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -49,16 +51,15 @@ open class VCPreviewView: UIImageView {
             return
         }
         
-        DispatchQueue.main.async { [weak self] in
+        drawingQueue.async { [weak self] in
             guard let `self` = self else {
                 return
             }
             
             var ciImage = CIImage(cvPixelBuffer: pixelBuffer)
             
-            let width = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
-            let height = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
-            var rect = CGRect(origin: .zero, size: CGSize(width: width, height: height))
+            let size = CGSize(width: CGFloat(CVPixelBufferGetWidth(pixelBuffer)), height: CGFloat(CVPixelBufferGetHeight(pixelBuffer)))
+            var rect = CGRect(origin: .zero, size: size)
             
             if self.isRotatingWithOrientation {
                 let orientation = UIDevice.current.orientation
@@ -76,19 +77,25 @@ open class VCPreviewView: UIImageView {
                 ciImage = ciImage.oriented(forExifOrientation: Int32(imageOrientation.rawValue))
                 
                 if orientation.isLandscape {
-                    rect = CGRect(origin: .zero, size: CGSize(width: height, height: width))
+                    rect = CGRect(origin: .zero, size: CGSize(width: size.height, height: size.width))
                 }
             }
             
-            EAGLContext.setCurrent(nil)
-            let context = CIContext(options: nil)
-            
-            guard let cgImage = context.createCGImage(ciImage, from: rect) else {
-                return
+            DispatchQueue.main.async { [weak self] in
+                guard let `self` = self else {
+                    return
+                }
+                
+                EAGLContext.setCurrent(nil)
+                let context = CIContext(options: nil)
+                
+                guard let cgImage = context.createCGImage(ciImage, from: rect) else {
+                    return
+                }
+                
+                let uiImage = UIImage(cgImage: cgImage)
+                self.image = uiImage
             }
-            
-            let uiImage = UIImage(cgImage: cgImage)
-            self.image = uiImage
         }
     }
 }

@@ -278,12 +278,6 @@ open class VCSimpleSession {
         }
     }
 
-    open func startSRTSession(url: String) {
-        graphManagementQueue.async { [weak self] in
-            self?.startSRTSessionInternal(url: url)
-        }
-    }
-
     open func endSession() {
         sessionStarted = false
 

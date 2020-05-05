@@ -62,15 +62,6 @@ open class VCSampleHandler: RPBroadcastSampleHandler {
                 url: url,
                 streamKey: config.streamName
             )
-        } else if url.starts(with: "srt") {
-            guard var urlComponents = URLComponents(string: url) else { return }
-            var items = urlComponents.queryItems ?? []
-            items.append(URLQueryItem(name: "streamid", value: config.streamName))
-            urlComponents.queryItems = items
-
-            session.startSRTSession(
-                url: urlComponents.url!.absoluteString
-            )
         } else {
             finishBroadcastWithError(errorInvalidURL)
         }

@@ -242,99 +242,6 @@ extension VCSimpleSession {
          vtSplit.setOutput(muxer)
          }
          */
-
-        if outputSession is SRTSession {
-            var streamIndex = 0
-            let videoStream = TSMultiplexer.Stream(
-                id: 0,
-                mediaType: .video,
-                videoCodecType: videoCodecType == .h264 ? kCMVideoCodecType_H264 : kCMVideoCodecType_HEVC,
-                timeBase: CMTime(value: 1, timescale: CMTimeScale(fps))
-            )
-            let codecType = videoCodecType == .h264 ? kCMVideoCodecType_H264 : kCMVideoCodecType_HEVC
-            annexbEncoder = AnnexbEncode(streamIndex,
-                                         codecType: codecType)
-            streamIndex += 1
-            let audioStream = TSMultiplexer.Stream(
-                id: 1, mediaType: .audio, videoCodecType: nil,
-                timeBase: CMTime(value: 1, timescale: CMTimeScale(audioSampleRate)))
-            adtsEncoder = ADTSEncode(streamIndex)
-
-            let streams = [videoStream, audioStream]
-            tsMuxer = TSMultiplexer(streams, ctsOffset: ctsOffset)
-
-            if let tsMuxer = tsMuxer, let adtsEncoder = adtsEncoder, let annexbEncoder = annexbEncoder {
-                tsMuxer.setOutput(outputSession)
-
-                adtsEncoder.setOutput(tsMuxer)
-                annexbEncoder.setOutput(tsMuxer)
-
-                aacSplit.setOutput(adtsEncoder)
-                vtSplit.setOutput(annexbEncoder)
-
-                /*
-                 fileSink = .init()
-                 if let applicationDocumentsDirectory = applicationDocumentsDirectory, let fileSink = fileSink {
-                 let params: FileSinkSessionParameters = .init()
-                 let file = applicationDocumentsDirectory + "/output.ts"
-                 params.data = (file, nil)
-                 fileSink.setSessionParameters(params)
-                 
-                 tsMuxer.setOutput(fileSink)
-                 }*/
-
-            }
-        }
-    }
-
-    func startSRTSessionInternal(url: String) {
-        let outputSession = SRTSession(uri: url) { [weak self] _, state  in
-            guard let strongSelf = self else { return }
-
-            Logger.info("ClientState: \(state)")
-
-            switch state {
-            case .connecting:
-                if strongSelf.sessionState != .reconnecting {
-                    strongSelf.sessionState = .starting
-                }
-            case .connected:
-                if strongSelf.sessionState != .reconnecting {
-                    strongSelf.graphManagementQueue.async { [weak strongSelf] in
-                        strongSelf?.addEncodersAndPacketizers()
-                    }
-                }
-                strongSelf.sessionState = .started
-                strongSelf.sessionStarted = true
-            case .error:
-                strongSelf.sessionState = .error
-                strongSelf.endSession()
-            case .notConnected:
-                strongSelf.sessionState = .ended
-                strongSelf.endSession()
-            case .reconnecting:
-                strongSelf.sessionState = .reconnecting
-            case .none:
-                break
-            }
-        }
-
-        startOutputSessionCommon(outputSession)
-
-        let sessionParameters = SRTSessionParameters()
-
-        sessionParameters.data = (
-            chunk: SRT_LIVE_DEF_PLSIZE,
-            loglevel: .err,
-            logfa: .general,
-            logfile: "",
-            internal_log: true,
-            autoreconnect: autoreconnect,
-            reconnectPeriod: reconnectPeriod,
-            quiet: false
-        )
-
-        outputSession.setSessionParameters(sessionParameters)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -445,31 +352,21 @@ extension VCSimpleSession {
                     audio.bitrate = strongSelf.audioChannelCount > 1 ? 78000 : 52000
                 }
             }
-
-            if outputSession is SRTSession && predicted < Float(bytesPerSec()) {
-                let bwe = predicted * 8
-                let bitrate = Int(Double(bwe) / kBitrateRatio)
-
-                setAudioBitrate(bitrate)
-
-                let availableVideoBitrate = bitrate - audio.bitrate
-                video.bitrate = max(Int(Float(availableVideoBitrate)), strongSelf.minVideoBitrate)
-            } else {
-                let videoBr = video.bitrate
-
-                setAudioBitrate(videoBr)
-
-                switch videoBr {
-                case 1152001...:
-                    video.bitrate = min(Int(videoBr / 384000 + vector) * 384000, strongSelf.bpsCeiling)
-                case 512001...:
-                    video.bitrate = min(Int(videoBr / 128000 + vector) * 128000, strongSelf.bpsCeiling)
-                case 128001...:
-                    video.bitrate = min(Int(videoBr / 64000 + vector) * 64000, strongSelf.bpsCeiling)
-                default:
-                    video.bitrate = max(min(Int(videoBr / 32000 + vector) * 32000,
-                                            strongSelf.bpsCeiling), strongSelf.minVideoBitrate)
-                }
+            
+            let videoBr = video.bitrate
+            
+            setAudioBitrate(videoBr)
+            
+            switch videoBr {
+            case 1152001...:
+                video.bitrate = min(Int(videoBr / 384000 + vector) * 384000, strongSelf.bpsCeiling)
+            case 512001...:
+                video.bitrate = min(Int(videoBr / 128000 + vector) * 128000, strongSelf.bpsCeiling)
+            case 128001...:
+                video.bitrate = min(Int(videoBr / 64000 + vector) * 64000, strongSelf.bpsCeiling)
+            default:
+                video.bitrate = max(min(Int(videoBr / 32000 + vector) * 32000,
+                                        strongSelf.bpsCeiling), strongSelf.minVideoBitrate)
             }
 
             if videoBR != video.bitrate || audioBR != audio.bitrate {
