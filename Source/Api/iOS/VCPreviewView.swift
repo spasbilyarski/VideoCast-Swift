@@ -10,7 +10,7 @@ import UIKit
 
 open class VCPreviewView: UIImageView {
     
-    public var paused = Atomic(false)
+    var paused = Atomic(false)
 
     public var flipX = false
     
@@ -29,6 +29,8 @@ open class VCPreviewView: UIImageView {
     }
 
     public var isRotatingWithOrientation = false
+    
+    private lazy var ciContext = CIContext(options: nil)
     
     private let drawingQueue = DispatchQueue(label: "openfresh.videocast.drawingQueue")
 
@@ -87,12 +89,11 @@ open class VCPreviewView: UIImageView {
                 }
                 
                 EAGLContext.setCurrent(nil)
-                let context = CIContext(options: nil)
                 
-                guard let cgImage = context.createCGImage(ciImage, from: rect) else {
+                guard let cgImage = self.ciContext.createCGImage(ciImage, from: rect) else {
                     return
                 }
-                
+
                 let uiImage = UIImage(cgImage: cgImage)
                 self.image = uiImage
             }
